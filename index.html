@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Frost Detail — Mobile Detailing · Columbus, OH</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #000;
+      --surface: #0a0a0a;
+      --surface2: #111;
+      --surface3: #1a1a1a;
+      --border: rgba(255,255,255,0.08);
+      --border2: rgba(255,255,255,0.14);
+      --ice: #40c8e0;
+      --ice-soft: rgba(64,200,224,0.1);
+      --white: #f5f5f7;
+      --mid: #a1a1a6;
+      --dim: #6e6e73;
+      --radius: 18px;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 17px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* Image handling — gradient fallbacks + real URLs */
+    .img-wrap {
+      position: relative;
+      overflow: hidden;
+      background: var(--surface2);
+    }
+    .img-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+    .img-wrap img {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform .5s;
+    }
+    .img-wrap img[data-loaded="false"],
+    .img-wrap img:not([src]) {
+      opacity: 0;
+    }
+
+    /* Gradient fallbacks per section */
+    .grad-hero::before   { background: linear-gradient(135deg, #0a1628 0%, #0d2137 40%, #091520 100%); }
+    .grad-interior::before { background: linear-gradient(135deg, #121820 0%, #1a2030 100%); }
+    .grad-exterior::before { background: linear-gradient(135deg, #0e1a20 0%, #162030 100%); }
+    .grad-full::before   { background: linear-gradient(135deg, #101820 0%, #182030 100%); }
+    .grad-wheel::before  { background: linear-gradient(135deg, #101418 0%, #181c24 100%); }
+    .grad-process::before{ background: linear-gradient(135deg, #0e1822 0%, #162030 100%); }
+    .grad-about::before  { background: linear-gradient(135deg, #101820 0%, #1a2230 100%); }
+    .grad-about2::before { background: linear-gradient(135deg, #0e1620 0%, #162030 100%); }
+    .grad-g1::before { background: linear-gradient(135deg, #0e1820 0%, #1a2030 100%); }
+    .grad-g2::before { background: linear-gradient(135deg, #101820 0%, #182238 100%); }
+    .grad-g3::before { background: linear-gradient(135deg, #0a1622 0%, #162030 100%); }
+    .grad-g4::before { background: linear-gradient(135deg, #0e1820 0%, #162030 100%); }
+    .grad-g5::before { background: linear-gradient(135deg, #101820 0%, #1a2030 100%); }
+    .grad-g6::before { background: linear-gradient(135deg, #0c1820 0%, #182030 100%); }
+    .grad-areas::before  { background: linear-gradient(135deg, #0a1020 0%, #10182e 100%); }
+    .grad-r1::before { background: linear-gradient(135deg, #0e1820 0%, #162030 100%); }
+    .grad-r2::before { background: linear-gradient(135deg, #101820 0%, #182030 100%); }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 52px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px;
+      background: rgba(0,0,0,0.72);
+      backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { font-size: 17px; font-weight: 600; letter-spacing: -0.02em; color: var(--white); text-decoration: none; }
+    .nav-links { display: flex; gap: 28px; list-style: none; }
+    .nav-links a { font-size: 13px; color: var(--mid); text-decoration: none; transition: color .2s; }
+    .nav-links a:hover { color: var(--white); }
+    .nav-cta { font-size: 13px; font-weight: 400; color: var(--ice); text-decoration: none; transition: opacity .2s; }
+    .nav-cta:hover { opacity: 0.7; }
+
+    /* HERO */
+    #hero {
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 80px 24px 60px;
+      position: relative; overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0; z-index: 0;
+      background: linear-gradient(160deg, #060e1a 0%, #0a1828 50%, #04100e 100%);
+    }
+    .hero-bg img {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; filter: brightness(0.2); z-index: 1;
+    }
+    .hero-glow {
+      position: absolute; top: 25%; left: 50%; transform: translateX(-50%);
+      width: 700px; height: 500px; z-index: 2;
+      background: radial-gradient(ellipse, rgba(64,200,224,0.08) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .hero-content { position: relative; z-index: 3; max-width: 720px; }
+    .hero-chip {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--ice-soft); border: 1px solid rgba(64,200,224,0.2);
+      border-radius: 100px; padding: 6px 16px;
+      font-size: 12px; font-weight: 500; color: var(--ice); margin-bottom: 32px;
+    }
+    .chip-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ice); animation: blink 2s ease-in-out infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .hero-h1 { font-size: clamp(52px, 9vw, 100px); font-weight: 600; letter-spacing: -0.04em; line-height: 1.0; margin-bottom: 24px; }
+    .hero-h1 span { color: var(--ice); }
+    .hero-sub { font-size: clamp(16px, 2.5vw, 20px); font-weight: 300; color: var(--mid); line-height: 1.65; margin-bottom: 44px; max-width: 480px; margin-left: auto; margin-right: auto; }
+    .hero-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn-fill { background: var(--ice); color: #000; font-size: 15px; font-weight: 500; padding: 13px 28px; border-radius: 100px; text-decoration: none; border: none; cursor: pointer; transition: opacity .2s, transform .15s; display: inline-block; font-family: inherit; }
+    .btn-fill:hover { opacity: 0.82; transform: scale(0.98); }
+    .btn-line { background: transparent; color: var(--white); font-size: 15px; font-weight: 400; padding: 13px 28px; border-radius: 100px; text-decoration: none; border: 1px solid var(--border2); transition: border-color .2s; }
+    .btn-line:hover { border-color: rgba(255,255,255,0.3); }
+    .hero-scroll { position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%); z-index: 3; }
+    .scroll-bar { width: 1px; height: 52px; background: linear-gradient(to bottom, var(--ice), transparent); animation: pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:.3} 50%{opacity:1} }
+
+    /* TICKER */
+    .ticker { overflow: hidden; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 13px 0; background: var(--surface); white-space: nowrap; }
+    .ticker-inner { display: inline-flex; animation: ticker 30s linear infinite; }
+    @keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+    .ticker-item { display: inline-flex; align-items: center; gap: 24px; padding: 0 36px; font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); }
+    .ticker-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--dim); }
+
+    /* SECTIONS */
+    .section { padding: 100px 24px; }
+    .container { max-width: 980px; margin: 0 auto; }
+    .eyebrow { font-size: 12px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ice); margin-bottom: 12px; }
+    h2 { font-size: clamp(32px, 5vw, 52px); font-weight: 600; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 16px; }
+    .lead { font-size: 19px; font-weight: 300; color: var(--mid); line-height: 1.6; max-width: 540px; }
+
+    /* SERVICES */
+    #services { background: var(--surface); }
+    .svc-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 56px; flex-wrap: wrap; gap: 20px; }
+    .svc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-radius: var(--radius); overflow: hidden; }
+    .svc-card { background: var(--surface2); padding: 36px; position: relative; overflow: hidden; transition: background .25s; }
+    .svc-card:hover { background: var(--surface3); }
+    .svc-num { position: absolute; right: 28px; top: 28px; font-size: 11px; font-weight: 500; letter-spacing: 0.06em; color: var(--dim); }
+    .svc-photo { width: 100%; height: 190px; border-radius: 12px; overflow: hidden; margin-bottom: 26px; position: relative; background: var(--surface3); }
+    .svc-photo img { width: 100%; height: 100%; object-fit: cover; display: block; filter: brightness(0.82); transition: transform .5s; }
+    .svc-card:hover .svc-photo img { transform: scale(1.04); }
+    .svc-tag { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ice); margin-bottom: 8px; }
+    .svc-card h3 { font-size: 21px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 10px; }
+    .svc-card p { font-size: 14px; color: var(--mid); line-height: 1.7; margin-bottom: 22px; }
+    .svc-stats { display: flex; gap: 20px; padding-top: 18px; border-top: 1px solid var(--border); margin-bottom: 20px; }
+    .svc-stat-lbl { font-size: 11px; color: var(--dim); margin-bottom: 3px; }
+    .svc-stat-val { font-size: 13px; font-weight: 500; }
+    .svc-btn { font-size: 14px; color: var(--ice); background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; gap: 5px; transition: opacity .2s; font-family: inherit; }
+    .svc-btn:hover { opacity: 0.7; }
+
+    /* PROCESS */
+    #process { background: var(--bg); }
+    .process-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; margin-top: 56px; }
+    .process-img { border-radius: var(--radius); overflow: hidden; aspect-ratio: 4/5; position: relative; background: var(--surface2); }
+    .process-img img { width: 100%; height: 100%; object-fit: cover; display: block; filter: brightness(0.82); }
+    .p-steps { }
+    .p-step { display: flex; gap: 22px; padding: 26px 0; border-bottom: 1px solid var(--border); }
+    .p-step:first-child { padding-top: 0; }
+    .p-step:last-child { border-bottom: none; }
+    .p-n { font-size: 11px; font-weight: 500; color: var(--ice); min-width: 22px; padding-top: 3px; letter-spacing: 0.04em; }
+    .p-b h4 { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 5px; }
+    .p-b p { font-size: 14px; color: var(--mid); line-height: 1.7; }
+
+    /* ABOUT */
+    #about { background: var(--surface); }
+    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; margin-top: 56px; }
+    .about-imgs { position: relative; padding-bottom: 28px; }
+    .about-main { border-radius: var(--radius); overflow: hidden; aspect-ratio: 3/4; background: var(--surface2); }
+    .about-main img { width: 100%; height: 100%; object-fit: cover; display: block; filter: brightness(0.84); }
+    .about-float { position: absolute; bottom: 0; right: -20px; width: 50%; border-radius: 14px; overflow: hidden; aspect-ratio: 4/3; border: 3px solid var(--surface); background: var(--surface2); }
+    .about-float img { width: 100%; height: 100%; object-fit: cover; display: block; filter: brightness(0.84); }
+    .team-cards { display: flex; flex-direction: column; gap: 12px; margin-top: 36px; }
+    .team-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 14px; padding: 22px; transition: border-color .25s; }
+    .team-card:hover { border-color: var(--border2); }
+    .team-card h3 { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 4px; }
+    .team-role { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ice); margin-bottom: 10px; }
+    .team-card p { font-size: 14px; color: var(--mid); line-height: 1.7; }
+    .team-phone { display: inline-block; font-size: 13px; color: var(--ice); margin-top: 10px; text-decoration: none; }
+
+    /* GALLERY */
+    #gallery { background: var(--bg); padding: 100px 0; }
+    .gallery-head { padding: 0 24px; margin-bottom: 44px; max-width: 980px; margin-left: auto; margin-right: auto; }
+    .gal-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 0 24px 4px; scrollbar-width: none; }
+    .gal-scroll::-webkit-scrollbar { display: none; }
+    .gal-item { flex-shrink: 0; width: 320px; height: 230px; border-radius: 14px; overflow: hidden; background: var(--surface2); }
+    .gal-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s; filter: brightness(0.84); }
+    .gal-item:hover img { transform: scale(1.05); }
+
+    /* AREAS */
+    #areas { background: var(--surface); }
+    .areas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: start; margin-top: 56px; }
+    .pills { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pill { font-size: 13px; color: var(--mid); background: var(--surface2); border: 1px solid var(--border); border-radius: 100px; padding: 8px 17px; transition: all .2s; cursor: default; }
+    .pill:hover { color: var(--ice); border-color: rgba(64,200,224,0.3); background: var(--ice-soft); }
+    .areas-note { font-size: 13px; color: var(--dim); margin-top: 16px; }
+    .areas-img { border-radius: var(--radius); overflow: hidden; aspect-ratio: 4/3; background: var(--surface2); }
+    .areas-img img { width: 100%; height: 100%; object-fit: cover; display: block; filter: brightness(0.7); }
+
+    /* BOOKING */
+    #booking { background: var(--bg); }
+    .booking-wrap { display: grid; grid-template-columns: 1fr 310px; gap: 28px; margin-top: 56px; }
+    .booking-shell { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .b-tabs { display: flex; border-bottom: 1px solid var(--border); }
+    .b-tab { flex: 1; padding: 15px 6px; text-align: center; font-size: 12px; font-weight: 500; letter-spacing: 0.03em; color: var(--dim); border-bottom: 2px solid transparent; transition: all .2s; cursor: default; }
+    .b-tab.active { color: var(--ice); border-bottom-color: var(--ice); }
+    .b-tab.done { color: var(--white); }
+    .b-dot { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: rgba(255,255,255,0.07); font-size: 10px; margin-right: 5px; vertical-align: middle; }
+    .b-tab.active .b-dot { background: var(--ice); color: #000; }
+    .b-tab.done .b-dot { background: var(--ice); color: #000; }
+    .b-page { display: none; padding: 32px; }
+    .b-page.active { display: block; }
+    .b-page h3 { font-size: 21px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 5px; }
+    .b-page > p { font-size: 14px; color: var(--mid); margin-bottom: 24px; }
+    .v-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 22px; }
+    .v-opt { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 16px 8px; text-align: center; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--mid); transition: all .2s; }
+    .v-opt:hover, .v-opt.on { border-color: var(--ice); color: var(--ice); background: var(--ice-soft); }
+    .fg { display: flex; flex-direction: column; gap: 5px; margin-bottom: 11px; }
+    .fg label { font-size: 11px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; color: var(--dim); }
+    .fg input, .fg textarea { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; color: var(--white); font-family: inherit; font-size: 14px; padding: 10px 13px; outline: none; transition: border-color .2s; }
+    .fg input:focus, .fg textarea:focus { border-color: rgba(64,200,224,0.4); }
+    .fg textarea { resize: vertical; min-height: 76px; }
+    .frow { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+    .cond-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 22px; }
+    .c-opt { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 16px 14px; cursor: pointer; transition: all .2s; }
+    .c-opt strong { display: block; font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+    .c-opt span { font-size: 12px; color: var(--dim); }
+    .c-opt:hover, .c-opt.on { border-color: var(--ice); background: var(--ice-soft); }
+    .svc-checks { display: flex; flex-direction: column; gap: 7px; margin-bottom: 22px; }
+    .svc-chk { display: flex; align-items: center; gap: 13px; background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 13px 14px; cursor: pointer; transition: border-color .2s; }
+    .svc-chk:hover { border-color: var(--border2); }
+    .svc-chk input { accent-color: var(--ice); width: 16px; height: 16px; cursor: pointer; flex-shrink: 0; }
+    .svc-chk strong { display: block; font-size: 14px; font-weight: 500; margin-bottom: 1px; }
+    .svc-chk span { font-size: 12px; color: var(--dim); }
+    .bnav { display: flex; justify-content: space-between; align-items: center; margin-top: 22px; }
+    .b-back { background: none; border: 1px solid var(--border); color: var(--mid); padding: 10px 20px; border-radius: 100px; cursor: pointer; font-size: 13px; font-family: inherit; transition: all .2s; }
+    .b-back:hover { color: var(--white); border-color: var(--border2); }
+    .b-next { background: var(--ice); color: #000; font-size: 13px; font-weight: 500; font-family: inherit; padding: 10px 24px; border-radius: 100px; border: none; cursor: pointer; transition: opacity .2s; }
+    .b-next:hover { opacity: 0.8; }
+
+    .qs { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; position: sticky; top: 64px; }
+    .qs-head { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); margin-bottom: 22px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+    .qs-row { margin-bottom: 14px; }
+    .qs-lbl { font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--dim); margin-bottom: 3px; }
+    .qs-val { font-size: 14px; font-weight: 500; }
+    .qs-sub { font-size: 12px; color: var(--mid); margin-top: 1px; }
+    .qs hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+    .qs-note { font-size: 13px; color: var(--dim); line-height: 1.7; }
+
+    /* REVIEWS */
+    #reviews { background: var(--surface); }
+    .reviews-grid { display: grid; grid-template-columns: 1fr 1fr 1.6fr; gap: 14px; margin-top: 52px; align-items: stretch; }
+    .r-cta { background: var(--ice); border-radius: var(--radius); padding: 36px 30px; display: flex; flex-direction: column; justify-content: flex-end; }
+    .r-cta h3 { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; color: #000; margin-bottom: 10px; line-height: 1.2; }
+    .r-cta p { font-size: 14px; color: rgba(0,0,0,0.6); margin-bottom: 22px; line-height: 1.6; }
+    .btn-dark-sm { background: #000; color: #fff; font-size: 13px; font-weight: 500; padding: 10px 20px; border-radius: 100px; text-decoration: none; display: inline-block; transition: opacity .2s; }
+    .btn-dark-sm:hover { opacity: 0.75; }
+    .r-img { border-radius: var(--radius); overflow: hidden; background: var(--surface2); }
+    .r-img img { width: 100%; height: 100%; object-fit: cover; display: block; filter: brightness(0.75); }
+
+    /* CONTACT */
+    #contact { background: var(--bg); }
+    .contact-grid { display: grid; grid-template-columns: 1fr 360px; gap: 52px; margin-top: 56px; align-items: start; }
+    .c-items { display: flex; flex-direction: column; gap: 2px; }
+    .c-item { background: var(--surface); border: 1px solid var(--border); padding: 21px 24px; display: flex; align-items: center; gap: 18px; }
+    .c-item:first-child { border-radius: 14px 14px 0 0; }
+    .c-item:last-child { border-radius: 0 0 14px 14px; }
+    .c-icon { width: 34px; height: 34px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .c-icon svg { width: 17px; height: 17px; stroke: var(--ice); fill: none; stroke-width: 1.5; }
+    .c-lbl { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--dim); margin-bottom: 3px; }
+    .c-val { font-size: 15px; font-weight: 500; }
+    .c-val a { color: var(--ice); text-decoration: none; }
+    .cta-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 34px; text-align: center; position: sticky; top: 64px; }
+    .cta-card h3 { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 10px; }
+    .cta-card p { font-size: 14px; color: var(--mid); margin-bottom: 22px; line-height: 1.6; }
+    .cta-card .btn-fill { width: 100%; display: block; text-align: center; margin-bottom: 10px; }
+    .btn-plain { display: block; width: 100%; text-align: center; background: none; border: 1px solid var(--border); color: var(--mid); font-size: 14px; padding: 12px; border-radius: 100px; text-decoration: none; transition: all .2s; font-family: inherit; cursor: pointer; }
+    .btn-plain:hover { border-color: var(--border2); color: var(--white); }
+
+    /* FOOTER */
+    footer { background: var(--surface); border-top: 1px solid var(--border); padding: 48px 24px 26px; }
+    .footer-inner { max-width: 980px; margin: 0 auto; }
+    .footer-top { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 36px; margin-bottom: 36px; }
+    .footer-brand { font-size: 16px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 9px; }
+    .footer-sub-text { font-size: 13px; color: var(--dim); line-height: 1.7; max-width: 250px; }
+    .footer-col h4 { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); margin-bottom: 14px; }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+    .footer-col ul a { font-size: 13px; color: var(--mid); text-decoration: none; transition: color .2s; }
+    .footer-col ul a:hover { color: var(--white); }
+    .footer-bottom { border-top: 1px solid var(--border); padding-top: 18px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+    .footer-bottom p { font-size: 12px; color: var(--dim); }
+
+    /* ANIMS */
+    @keyframes up { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+    .hero-chip { animation: up .45s ease .1s both; }
+    .hero-h1 { animation: up .55s ease .2s both; }
+    .hero-sub { animation: up .55s ease .32s both; }
+    .hero-btns { animation: up .55s ease .42s both; }
+
+    /* MOBILE */
+    @media (max-width: 768px) {
+      nav { padding: 0 16px; }
+      .nav-links { display: none; }
+      .section { padding: 80px 20px; }
+      #gallery, .gallery-head { padding-left: 20px; padding-right: 20px; }
+      h2 { font-size: 32px; }
+      .hero-h1 { font-size: 46px; }
+      .svc-grid, .process-grid, .about-grid, .areas-grid, .booking-wrap, .contact-grid, .reviews-grid, .footer-top { grid-template-columns: 1fr; gap: 20px; }
+      .frow { grid-template-columns: 1fr; }
+      .about-float { display: none; }
+      .hero-scroll { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="#hero" class="nav-logo">Frost Detail</a>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#process">Process</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="#booking" class="nav-cta">Get Quote</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg">
+    <img src="https://images.unsplash.com/photo-1600705722908-bce71a61f710?w=1800&q=80&auto=format&fit=crop" alt="" loading="eager" onerror="this.style.display='none'"/>
+  </div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-chip"><span class="chip-dot"></span>Mobile Detailing · Columbus, OH</div>
+    <h1 class="hero-h1">Your car.<br><span>Spotless.</span></h1>
+    <p class="hero-sub">Premium mobile detailing brought to your driveway. Interior, exterior, wheels — we handle everything.</p>
+    <div class="hero-btns">
+      <a href="#booking" class="btn-fill">Request a Quote</a>
+      <a href="tel:6144408410" class="btn-line">(614) 440-8410</a>
+    </div>
+  </div>
+  <div class="hero-scroll"><div class="scroll-bar"></div></div>
+</section>
+
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-inner">
+    <span class="ticker-item">Full Detail<span class="ticker-dot"></span></span>
+    <span class="ticker-item">Interior Deep Clean<span class="ticker-dot"></span></span>
+    <span class="ticker-item">Exterior Wash &amp; Wax<span class="ticker-dot"></span></span>
+    <span class="ticker-item">Tire &amp; Wheel Detail<span class="ticker-dot"></span></span>
+    <span class="ticker-item">Glass Cleaning<span class="ticker-dot"></span></span>
+    <span class="ticker-item">We Come to You<span class="ticker-dot"></span></span>
+    <span class="ticker-item">Upper Arlington · Dublin · Columbus<span class="ticker-dot"></span></span>
+    <span class="ticker-item">Full Detail<span class="ticker-dot"></span></span>
+    <span class="ticker-item">Interior Deep Clean<span class="ticker-dot"></span></span>
+    <span class="ticker-item">Exterior Wash &amp; Wax<span class="ticker-dot"></span></span>
+    <span class="ticker-item">Tire &amp; Wheel Detail<span class="ticker-dot"></span></span>
+    <span class="ticker-item">Glass Cleaning<span class="ticker-dot"></span></span>
+    <span class="ticker-item">We Come to You<span class="ticker-dot"></span></span>
+    <span class="ticker-item">Upper Arlington · Dublin · Columbus<span class="ticker-dot"></span></span>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<section id="services" class="section">
+  <div class="container">
+    <div class="svc-header">
+      <div><div class="eyebrow">Services</div><h2>What we offer</h2></div>
+      <a href="#booking" class="btn-fill">Book Now</a>
+    </div>
+    <div class="svc-grid">
+
+      <div class="svc-card">
+        <div class="svc-num">01</div>
+        <div class="svc-photo">
+          <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80&auto=format&fit=crop" alt="Interior Detail" loading="lazy" onerror="this.style.display='none'"/>
+        </div>
+        <div class="svc-tag">Interior</div>
+        <h3>Interior Deep Clean</h3>
+        <p>Full extraction from seats to carpet. Stains, pet hair, and odors removed using hot water extraction, the Tornador, and P&S professional products.</p>
+        <div class="svc-stats">
+          <div><div class="svc-stat-lbl">Method</div><div class="svc-stat-val">Hot Water Extraction</div></div>
+          <div><div class="svc-stat-lbl">Covers</div><div class="svc-stat-val">Headliner to Carpet</div></div>
+        </div>
+        <button class="svc-btn" onclick="document.getElementById('booking').scrollIntoView({behavior:'smooth'})">Get a Quote →</button>
+      </div>
+
+      <div class="svc-card">
+        <div class="svc-num">02</div>
+        <div class="svc-photo">
+          <img src="https://images.unsplash.com/photo-1607860108855-64acf2078ed9?w=800&q=80&auto=format&fit=crop" alt="Exterior Wash" loading="lazy" onerror="this.style.display='none'"/>
+        </div>
+        <div class="svc-tag">Exterior</div>
+        <h3>Exterior Wash &amp; Wax</h3>
+        <p>Foam cannon pre-wash, hand wash, clay bar decontamination, and carnauba wax finish. Streak-free glass, dressed tires, clean wheels.</p>
+        <div class="svc-stats">
+          <div><div class="svc-stat-lbl">Finish</div><div class="svc-stat-val">Carnauba Wax</div></div>
+          <div><div class="svc-stat-lbl">Includes</div><div class="svc-stat-val">Wheels &amp; Glass</div></div>
+        </div>
+        <button class="svc-btn" onclick="document.getElementById('booking').scrollIntoView({behavior:'smooth'})">Get a Quote →</button>
+      </div>
+
+      <div class="svc-card">
+        <div class="svc-num">03</div>
+        <div class="svc-photo">
+          <img src="https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=800&q=80&auto=format&fit=crop" alt="Full Detail" loading="lazy" onerror="this.style.display='none'"/>
+        </div>
+        <div class="svc-tag">Full Service</div>
+        <h3>Full Detail</h3>
+        <p>Our most complete service — full interior deep clean combined with exterior wash, wax, tire dressing, and glass cleaning. The works.</p>
+        <div class="svc-stats">
+          <div><div class="svc-stat-lbl">Duration</div><div class="svc-stat-val">3–5 Hours</div></div>
+          <div><div class="svc-stat-lbl">Best For</div><div class="svc-stat-val">Neglected Vehicles</div></div>
+        </div>
+        <button class="svc-btn" onclick="document.getElementById('booking').scrollIntoView({behavior:'smooth'})">Get a Quote →</button>
+      </div>
+
+      <div class="svc-card">
+        <div class="svc-num">04</div>
+        <div class="svc-photo">
+          <img src="https://images.unsplash.com/photo-1502877338535-766e1452684a?w=800&q=80&auto=format&fit=crop" alt="Tire and Wheel" loading="lazy" onerror="this.style.display='none'"/>
+        </div>
+        <div class="svc-tag">Add-on</div>
+        <h3>Tire &amp; Wheel Detail</h3>
+        <p>Deep brake dust removal, scrubbed wheels, and dressed tires. Available standalone or included in any full service booking.</p>
+        <div class="svc-stats">
+          <div><div class="svc-stat-lbl">Product</div><div class="svc-stat-val">P&S Brake Duster</div></div>
+          <div><div class="svc-stat-lbl">Finish</div><div class="svc-stat-val">Tire Dressing</div></div>
+        </div>
+        <button class="svc-btn" onclick="document.getElementById('booking').scrollIntoView({behavior:'smooth'})">Get a Quote →</button>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section id="process" class="section">
+  <div class="container">
+    <div class="eyebrow">How It Works</div>
+    <h2>Simple. Fast. Mobile.</h2>
+    <div class="process-grid">
+      <div class="process-img">
+        <img src="https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=800&q=80&auto=format&fit=crop" alt="Process" loading="lazy" onerror="this.style.display='none'"/>
+      </div>
+      <div class="p-steps">
+        <div class="p-step"><div class="p-n">01</div><div class="p-b"><h4>Request a Quote</h4><p>Fill out the form with your vehicle details and preferred date. We'll respond within 24 hours with pricing.</p></div></div>
+        <div class="p-step"><div class="p-n">02</div><div class="p-b"><h4>We Come to You</h4><p>Our fully self-contained unit arrives at your home, apartment, or office. No drop-off — ever.</p></div></div>
+        <div class="p-step"><div class="p-n">03</div><div class="p-b"><h4>We Get to Work</h4><p>Professional products, attention to every corner. You do whatever you want while we handle your car.</p></div></div>
+        <div class="p-step"><div class="p-n">04</div><div class="p-b"><h4>Done Right</h4><p>We walk you through the results. Not satisfied? We'll fix it. That's the guarantee.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about" class="section">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-imgs">
+        <div class="about-main">
+          <img src="https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=700&q=80&auto=format&fit=crop" alt="Detailing" loading="lazy" onerror="this.style.display='none'"/>
+        </div>
+        <div class="about-float">
+          <img src="https://images.unsplash.com/photo-1607860108855-64acf2078ed9?w=500&q=80&auto=format&fit=crop" alt="Car" loading="lazy" onerror="this.style.display='none'"/>
+        </div>
+      </div>
+      <div>
+        <div class="eyebrow">The Team</div>
+        <h2>Built by two guys who love clean cars</h2>
+        <p class="lead">Frost Detail is a Columbus mobile detailing company run by Ricky and Brody — two guys obsessed with doing it right.</p>
+        <div class="team-cards">
+          <div class="team-card">
+            <h3>Ricky Molasso-Matessa</h3>
+            <div class="team-role">Co-Founder · Varsity Wrestler</div>
+            <p>Ricky brings the same discipline from the mat to every job — methodical, precise, and relentless about quality.</p>
+          </div>
+          <div class="team-card">
+            <h3>Brody Hunt</h3>
+            <div class="team-role">Co-Founder · Car Enthusiast</div>
+            <p>Brody's passion for cars runs deep. Detail-obsessed and always chasing the perfect finish.</p>
+            <a href="tel:6147354276" class="team-phone">(614) 735-4276</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section id="gallery">
+  <div class="gallery-head container">
+    <div class="eyebrow">Gallery</div>
+    <h2>Our Work</h2>
+  </div>
+  <div class="gal-scroll">
+    <div class="gal-item"><img src="https://images.unsplash.com/photo-1502877338535-766e1452684a?w=600&q=80&auto=format&fit=crop" alt="" loading="lazy" onerror="this.style.display='none'"/></div>
+    <div class="gal-item"><img src="https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=600&q=80&auto=format&fit=crop" alt="" loading="lazy" onerror="this.style.display='none'"/></div>
+    <div class="gal-item"><img src="https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=600&q=80&auto=format&fit=crop" alt="" loading="lazy" onerror="this.style.display='none'"/></div>
+    <div class="gal-item"><img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80&auto=format&fit=crop" alt="" loading="lazy" onerror="this.style.display='none'"/></div>
+    <div class="gal-item"><img src="https://images.unsplash.com/photo-1607860108855-64acf2078ed9?w=600&q=80&auto=format&fit=crop" alt="" loading="lazy" onerror="this.style.display='none'"/></div>
+    <div class="gal-item"><img src="https://images.unsplash.com/photo-1600705722908-bce71a61f710?w=600&q=80&auto=format&fit=crop" alt="" loading="lazy" onerror="this.style.display='none'"/></div>
+  </div>
+</section>
+
+<!-- AREAS -->
+<section id="areas" class="section">
+  <div class="container">
+    <div class="areas-grid">
+      <div>
+        <div class="eyebrow">Coverage</div>
+        <h2>We come to you</h2>
+        <p class="lead" style="margin-bottom:28px">Fully self-contained — no water or power hookup needed. We cover Columbus and the surrounding suburbs.</p>
+        <div class="pills">
+          <div class="pill">Columbus</div><div class="pill">Upper Arlington</div>
+          <div class="pill">Dublin</div><div class="pill">Hilliard</div>
+          <div class="pill">Westerville</div><div class="pill">Gahanna</div>
+          <div class="pill">Grove City</div><div class="pill">Lewis Center</div>
+          <div class="pill">New Albany</div><div class="pill">Obetz</div><div class="pill">Bexley</div>
+        </div>
+        <p class="areas-note">Not listed? Call us — (614) 440-8410</p>
+      </div>
+      <div class="areas-img">
+        <img src="https://images.unsplash.com/photo-1548199569-3e1c6aa8f469?w=700&q=80&auto=format&fit=crop" alt="Columbus" loading="lazy" onerror="this.style.display='none'"/>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BOOKING -->
+<section id="booking" class="section">
+  <div class="container">
+    <div class="eyebrow">Schedule</div>
+    <h2>Request a Quote</h2>
+    <p class="lead">4 quick steps. We'll respond within 24 hours.</p>
+    <div class="booking-wrap">
+      <div class="booking-shell">
+        <div class="b-tabs">
+          <div class="b-tab active" id="t1"><span class="b-dot">1</span>Vehicle</div>
+          <div class="b-tab" id="t2"><span class="b-dot">2</span>Condition</div>
+          <div class="b-tab" id="t3"><span class="b-dot">3</span>Service</div>
+          <div class="b-tab" id="t4"><span class="b-dot">4</span>Contact</div>
+        </div>
+        <div class="b-page active" id="p1">
+          <h3>Vehicle Type</h3>
+          <p>What are we detailing?</p>
+          <div class="v-grid">
+            <div class="v-opt" onclick="pickV(this,'Sedan')">Sedan</div>
+            <div class="v-opt" onclick="pickV(this,'SUV')">SUV</div>
+            <div class="v-opt" onclick="pickV(this,'Truck')">Truck</div>
+            <div class="v-opt" onclick="pickV(this,'Van')">Van</div>
+            <div class="v-opt" onclick="pickV(this,'Coupe')">Coupe</div>
+            <div class="v-opt" onclick="pickV(this,'Other')">Other</div>
+          </div>
+          <div class="frow">
+            <div class="fg"><label>Year</label><input id="yr" type="text" placeholder="2024" oninput="syncQS()"/></div>
+            <div class="fg"><label>Make</label><input id="mk" type="text" placeholder="Toyota" oninput="syncQS()"/></div>
+          </div>
+          <div class="fg"><label>Model</label><input id="mo" type="text" placeholder="Camry" oninput="syncQS()"/></div>
+          <div class="bnav"><div></div><button class="b-next" onclick="go(1,2)">Continue →</button></div>
+        </div>
+        <div class="b-page" id="p2">
+          <h3>Condition</h3>
+          <p>How would you describe your vehicle right now?</p>
+          <div class="cond-grid">
+            <div class="c-opt" onclick="pickC(this,'Excellent')"><strong>Excellent</strong><span>Minimal wear, maintained regularly</span></div>
+            <div class="c-opt" onclick="pickC(this,'Good')"><strong>Good</strong><span>Light stains, minor buildup</span></div>
+            <div class="c-opt" onclick="pickC(this,'Fair')"><strong>Fair</strong><span>Noticeable stains, pet hair</span></div>
+            <div class="c-opt" onclick="pickC(this,'Needs Work')"><strong>Needs Work</strong><span>Heavy buildup, strong odors</span></div>
+          </div>
+          <div class="bnav"><button class="b-back" onclick="go(2,1)">← Back</button><button class="b-next" onclick="go(2,3)">Continue →</button></div>
+        </div>
+        <div class="b-page" id="p3">
+          <h3>Select Service</h3>
+          <p>Choose one or more.</p>
+          <div class="svc-checks">
+            <label class="svc-chk"><input type="checkbox" name="svc" value="Interior Deep Clean" onchange="syncQS()"/><div><strong>Interior Deep Clean</strong><span>Full extraction, stain removal, Tornador clean</span></div></label>
+            <label class="svc-chk"><input type="checkbox" name="svc" value="Exterior Wash &amp; Wax" onchange="syncQS()"/><div><strong>Exterior Wash &amp; Wax</strong><span>Foam cannon, hand wash, carnauba wax</span></div></label>
+            <label class="svc-chk"><input type="checkbox" name="svc" value="Full Detail" onchange="syncQS()"/><div><strong>Full Detail</strong><span>Interior + exterior combined</span></div></label>
+            <label class="svc-chk"><input type="checkbox" name="svc" value="Tire &amp; Wheel Detail" onchange="syncQS()"/><div><strong>Tire &amp; Wheel Detail</strong><span>Brake dust removal, dressing</span></div></label>
+            <label class="svc-chk"><input type="checkbox" name="svc" value="Glass Cleaning" onchange="syncQS()"/><div><strong>Glass Cleaning</strong><span>Streak-free inside &amp; out</span></div></label>
+          </div>
+          <div class="bnav"><button class="b-back" onclick="go(3,2)">← Back</button><button class="b-next" onclick="go(3,4)">Continue →</button></div>
+        </div>
+        <div class="b-page" id="p4">
+          <h3>Your Info</h3>
+          <p>We'll reach out to confirm your appointment.</p>
+          <div class="fg"><label>Full Name *</label><input id="fn" type="text" placeholder="Your name"/></div>
+          <div class="frow">
+            <div class="fg"><label>Phone *</label><input id="ph" type="tel" placeholder="(614) 000-0000"/></div>
+            <div class="fg"><label>Email</label><input id="em" type="email" placeholder="you@email.com"/></div>
+          </div>
+          <div class="fg"><label>Preferred Date</label><input id="pd" type="date"/></div>
+          <div class="fg"><label>Notes</label><textarea id="nt" placeholder="Location, anything about the vehicle..."></textarea></div>
+          <div class="bnav"><button class="b-back" onclick="go(4,3)">← Back</button><button class="b-next" onclick="submitForm()">Submit →</button></div>
+        </div>
+        <div class="b-page" id="p5" style="text-align:center;padding:52px 32px">
+          <div style="width:52px;height:52px;border-radius:50%;border:1px solid var(--ice);background:var(--ice-soft);display:flex;align-items:center;justify-content:center;margin:0 auto 18px">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#40c8e0" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <h3 style="margin-bottom:8px">Quote Request Sent</h3>
+          <p style="color:var(--mid);max-width:280px;margin:0 auto 22px;font-size:14px">We'll review your details and get back to you within 24 hours.</p>
+          <button class="b-next" onclick="resetForm()">Submit Another</button>
+        </div>
+      </div>
+      <div class="qs">
+        <div class="qs-head">Quote Summary</div>
+        <div class="qs-row"><div class="qs-lbl">Vehicle</div><div class="qs-val" id="qs-v">—</div><div class="qs-sub" id="qs-v2"></div></div>
+        <div class="qs-row"><div class="qs-lbl">Condition</div><div class="qs-val" id="qs-c">—</div></div>
+        <div class="qs-row"><div class="qs-lbl">Services</div><div class="qs-val" id="qs-s">—</div></div>
+        <hr>
+        <p class="qs-note">We'll respond within 24 hours with a personalized quote.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section id="reviews" class="section">
+  <div class="container">
+    <div class="eyebrow">Reviews</div>
+    <h2>Happy clients</h2>
+    <div class="reviews-grid">
+      <div class="r-cta">
+        <h3>Be one of our first</h3>
+        <p>Help other Columbus car owners find us.</p>
+        <a href="https://g.page/r/review" target="_blank" class="btn-dark-sm">Leave a Review</a>
+      </div>
+      <div class="r-img" style="aspect-ratio:1;min-height:200px">
+        <img src="https://images.unsplash.com/photo-1502877338535-766e1452684a?w=500&q=80&auto=format&fit=crop" alt="" loading="lazy" onerror="this.style.display='none'"/>
+      </div>
+      <div class="r-img" style="min-height:200px">
+        <img src="https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=800&q=80&auto=format&fit=crop" alt="" loading="lazy" onerror="this.style.display='none'"/>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="section">
+  <div class="container">
+    <div class="eyebrow">Contact</div>
+    <h2>Get in touch</h2>
+    <div class="contact-grid">
+      <div class="c-items">
+        <div class="c-item"><div class="c-icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="c-lbl">Location</div><div class="c-val">Columbus, OH — Mobile Service</div></div></div>
+        <div class="c-item"><div class="c-icon"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.64 3.44 2 2 0 0 1 3.61 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.96a16 16 0 0 0 6 6l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 16.92z"/></svg></div><div><div class="c-lbl">Phone</div><div class="c-val"><a href="tel:6144408410">(614) 440-8410</a></div></div></div>
+        <div class="c-item"><div class="c-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><div><div class="c-lbl">Email</div><div class="c-val"><a href="mailto:FrostDetailsCo@gmail.com">FrostDetailsCo@gmail.com</a></div></div></div>
+        <div class="c-item"><div class="c-icon"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><div><div class="c-lbl">Rating</div><div class="c-val">5-Star Mobile Detailing</div></div></div>
+      </div>
+      <div class="cta-card">
+        <h3>Ready to book?</h3>
+        <p>Get a free quote or give us a call. We'll make your car look incredible.</p>
+        <a href="#booking" class="btn-fill">Request a Quote</a>
+        <a href="tel:6144408410" class="btn-plain">Call (614) 440-8410</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <div class="footer-brand">Frost Detail</div>
+        <p class="footer-sub-text">Premium mobile detailing in Columbus, OH. We come to you — no drop-off needed.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Services</h4>
+        <ul>
+          <li><a href="#services">Interior Deep Clean</a></li>
+          <li><a href="#services">Exterior Wash &amp; Wax</a></li>
+          <li><a href="#services">Full Detail</a></li>
+          <li><a href="#services">Tire &amp; Wheel Detail</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#about">About</a></li>
+          <li><a href="#areas">Service Areas</a></li>
+          <li><a href="#booking">Get a Quote</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 Frost Detail · Columbus, OH</p>
+      <p>FrostDetailsCo@gmail.com · (614) 440-8410</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+  let B={v:'',c:''};
+  function pickV(el,t){document.querySelectorAll('#p1 .v-opt').forEach(b=>b.classList.remove('on'));el.classList.add('on');B.v=t;syncQS();}
+  function pickC(el,c){document.querySelectorAll('.c-opt').forEach(b=>b.classList.remove('on'));el.classList.add('on');B.c=c;syncQS();}
+  function syncQS(){
+    const y=document.getElementById('yr')?.value||'',m=document.getElementById('mk')?.value||'',mo=document.getElementById('mo')?.value||'';
+    document.getElementById('qs-v').textContent=B.v||'—';
+    document.getElementById('qs-v2').textContent=[y,m,mo].filter(Boolean).join(' ');
+    document.getElementById('qs-c').textContent=B.c||'—';
+    const s=[...document.querySelectorAll('input[name="svc"]:checked')].map(i=>i.value);
+    document.getElementById('qs-s').textContent=s.length?s.join(', '):'—';
+  }
+  function go(from,to){
+    document.getElementById('p'+from).classList.remove('active');
+    document.getElementById('p'+to).classList.add('active');
+    const tf=document.getElementById('t'+from),tt=document.getElementById('t'+to);
+    if(to>from){tf.classList.remove('active');tf.classList.add('done');tt.classList.add('active');}
+    else{tf.classList.remove('active');tt.classList.remove('done');tt.classList.add('active');}
+    syncQS();
+  }
+  function submitForm(){
+    // To connect Google Sheets, uncomment + paste your Apps Script URL:
+    // fetch('YOUR_APPS_SCRIPT_URL',{method:'POST',mode:'no-cors',body:JSON.stringify({vehicle:B.v,condition:B.c,year:document.getElementById('yr').value,make:document.getElementById('mk').value,model:document.getElementById('mo').value,services:[...document.querySelectorAll('input[name="svc"]:checked')].map(i=>i.value).join(', '),name:document.getElementById('fn').value,phone:document.getElementById('ph').value,email:document.getElementById('em').value,date:document.getElementById('pd').value,notes:document.getElementById('nt').value})});
+    document.getElementById('p4').classList.remove('active');
+    document.getElementById('p5').classList.add('active');
+    document.querySelectorAll('.b-tab').forEach(t=>{t.classList.remove('active');t.classList.add('done');});
+  }
+  function resetForm(){
+    document.getElementById('p5').classList.remove('active');
+    document.getElementById('p1').classList.add('active');
+    document.querySelectorAll('.b-tab').forEach((t,i)=>{t.classList.remove('active','done');if(i===0)t.classList.add('active');});
+    B={v:'',c:''};syncQS();
+  }
+  document.querySelectorAll('input[name="svc"]').forEach(cb=>cb.addEventListener('change',syncQS));
+</script>
+</body>
+</html>
