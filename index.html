@@ -734,13 +734,138 @@
     else{tf.classList.remove('active');tt.classList.remove('done');tt.classList.add('active');}
     syncQS();
   }
-  function submitForm(){
-    // To connect Google Sheets, uncomment + paste your Apps Script URL:
-    // fetch('YOUR_APPS_SCRIPT_URL',{method:'POST',mode:'no-cors',body:JSON.stringify({vehicle:B.v,condition:B.c,year:document.getElementById('yr').value,make:document.getElementById('mk').value,model:document.getElementById('mo').value,services:[...document.querySelectorAll('input[name="svc"]:checked')].map(i=>i.value).join(', '),name:document.getElementById('fn').value,phone:document.getElementById('ph').value,email:document.getElementById('em').value,date:document.getElementById('pd').value,notes:document.getElementById('nt').value})});
+  <script>
+let B = { v:'', c:'' };
+
+function pickV(el,t){
+  document.querySelectorAll('#p1 .v-opt')
+    .forEach(b=>b.classList.remove('on'));
+
+  el.classList.add('on');
+  B.v=t;
+  syncQS();
+}
+
+function pickC(el,c){
+  document.querySelectorAll('.c-opt')
+    .forEach(b=>b.classList.remove('on'));
+
+  el.classList.add('on');
+  B.c=c;
+  syncQS();
+}
+
+function syncQS(){
+  const y=document.getElementById('yr')?.value||'';
+  const m=document.getElementById('mk')?.value||'';
+  const mo=document.getElementById('mo')?.value||'';
+
+  document.getElementById('qs-v').textContent=B.v||'—';
+  document.getElementById('qs-v2').textContent=
+    [y,m,mo].filter(Boolean).join(' ');
+
+  document.getElementById('qs-c').textContent=B.c||'—';
+
+  const s=[...document.querySelectorAll('input[name="svc"]:checked')]
+    .map(i=>i.value);
+
+  document.getElementById('qs-s').textContent=
+    s.length ? s.join(', ') : '—';
+}
+
+function go(from,to){
+  document.getElementById('p'+from).classList.remove('active');
+  document.getElementById('p'+to).classList.add('active');
+
+  const tf=document.getElementById('t'+from);
+  const tt=document.getElementById('t'+to);
+
+  if(to>from){
+    tf.classList.remove('active');
+    tf.classList.add('done');
+    tt.classList.add('active');
+  } else {
+    tf.classList.remove('active');
+    tt.classList.remove('done');
+    tt.classList.add('active');
+  }
+
+  syncQS();
+}
+
+async function submitForm(){
+
+  const data = {
+    vehicleType: B.v,
+    year: document.getElementById('yr').value,
+    make: document.getElementById('mk').value,
+    model: document.getElementById('mo').value,
+    condition: B.c,
+
+    services: [...document.querySelectorAll('input[name="svc"]:checked')]
+      .map(i => i.value)
+      .join(', '),
+
+    name: document.getElementById('fn').value,
+    phone: document.getElementById('ph').value,
+    email: document.getElementById('em').value,
+    preferredDate: document.getElementById('pd').value,
+    notes: document.getElementById('nt').value
+  };
+
+  try {
+
+    await fetch(
+      'https://script.google.com/macros/s/AKfycbwCfZPwZEFIhl0Px2AJtq1Vlbt8FaUBvDZB3PQ5ycp1xQR25QE9nxiuZSmMreB5nuYfzA/exec',
+      {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      }
+    );
+
     document.getElementById('p4').classList.remove('active');
     document.getElementById('p5').classList.add('active');
-    document.querySelectorAll('.b-tab').forEach(t=>{t.classList.remove('active');t.classList.add('done');});
+
+    document.querySelectorAll('.b-tab').forEach(t=>{
+      t.classList.remove('active');
+      t.classList.add('done');
+    });
+
+  } catch(err){
+    alert('Something went wrong. Please try again.');
+    console.error(err);
   }
+}
+
+function resetForm(){
+  document.getElementById('p5').classList.remove('active');
+  document.getElementById('p1').classList.add('active');
+
+  document.querySelectorAll('.b-tab').forEach((t,i)=>{
+    t.classList.remove('active','done');
+
+    if(i===0){
+      t.classList.add('active');
+    }
+  });
+
+  B={v:'',c:''};
+
+  document.querySelectorAll('input[name="svc"]')
+    .forEach(cb=>cb.checked=false);
+
+  syncQS();
+}
+
+document.querySelectorAll('input[name="svc"]')
+  .forEach(cb=>cb.addEventListener('change',syncQS));
+
+syncQS();
+</script>
   function resetForm(){
     document.getElementById('p5').classList.remove('active');
     document.getElementById('p1').classList.add('active');
