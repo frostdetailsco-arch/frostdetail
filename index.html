@@ -734,13 +734,48 @@
     else{tf.classList.remove('active');tt.classList.remove('done');tt.classList.add('active');}
     syncQS();
   }
-  function submitForm(){
-    // To connect Google Sheets, uncomment + paste your Apps Script URL:
-    // fetch('YOUR_APPS_SCRIPT_URL',{method:'POST',mode:'no-cors',body:JSON.stringify({vehicle:B.v,condition:B.c,year:document.getElementById('yr').value,make:document.getElementById('mk').value,model:document.getElementById('mo').value,services:[...document.querySelectorAll('input[name="svc"]:checked')].map(i=>i.value).join(', '),name:document.getElementById('fn').value,phone:document.getElementById('ph').value,email:document.getElementById('em').value,date:document.getElementById('pd').value,notes:document.getElementById('nt').value})});
+  async function submitForm(){
+
+  const data = {
+    vehicle: B.v,
+    condition: B.c,
+    year: document.getElementById('yr').value,
+    make: document.getElementById('mk').value,
+    model: document.getElementById('mo').value,
+    services: [...document.querySelectorAll('input[name="svc"]:checked')]
+      .map(i => i.value)
+      .join(', '),
+
+    name: document.getElementById('fn').value,
+    phone: document.getElementById('ph').value,
+    email: document.getElementById('em').value,
+    date: document.getElementById('pd').value,
+    notes: document.getElementById('nt').value
+  };
+
+  try {
+
+    await fetch('https://script.google.com/macros/s/AKfycbwICckHoCSg3p6LEjGIOESpt01J-DWoK3Tqh9-axsBL99YlQy_BSjzEFHp5I7IZ9oFo4A/exec', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+
     document.getElementById('p4').classList.remove('active');
     document.getElementById('p5').classList.add('active');
-    document.querySelectorAll('.b-tab').forEach(t=>{t.classList.remove('active');t.classList.add('done');});
+
+    document.querySelectorAll('.b-tab').forEach(t=>{
+      t.classList.remove('active');
+      t.classList.add('done');
+    });
+
+  } catch(err){
+    alert('Something went wrong.');
+    console.error(err);
   }
+}
   function resetForm(){
     document.getElementById('p5').classList.remove('active');
     document.getElementById('p1').classList.add('active');
