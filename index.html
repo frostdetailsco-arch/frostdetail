@@ -783,6 +783,14 @@
     B={v:'',c:''};syncQS();
   }
   document.querySelectorAll('input[name="svc"]').forEach(cb=>cb.addEventListener('change',syncQS));
+flatpickr("#pd", {
+  minDate: "today",
+  disable: [
+    function(date) {
+      return (date.getDay() === 0);
+    }
+  ]
+});
 </script>
 </body>
 </html>
